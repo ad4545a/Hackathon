@@ -1,23 +1,47 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON
-from sqlalchemy.sql import func
-from .database import Base
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from enum import Enum
 
-class Scheme(Base):
-    __tablename__ = "schemes"
+class Caste(str, Enum):
+    SC = "SC"
+    ST = "ST"
+    OBC = "OBC"
+    GENERAL = "General"
 
-    id = Column(Integer, primary_key=True, index=True)
-    scheme_code = Column(String, unique=True, index=True, nullable=True) # ID from OGD
-    name = Column(String, index=True, nullable=False)
-    ministry = Column(String, index=True, nullable=True)
-    description = Column(Text, nullable=True)
-    eligibility = Column(Text, nullable=True) # Storing as text for now, could be JSON
-    benefits = Column(Text, nullable=True)
-    is_central = Column(Boolean, default=True) # True for Central, False for State
-    state_name = Column(String, nullable=True) # If state scheme
-    last_updated_ogd = Column(DateTime, nullable=True) # Date from OGD
-    
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+class Occupation(str, Enum):
+    STUDENT = "Student"
+    FARMER = "Farmer"
+    DAILY_WAGE_WORKER = "Daily Wage Worker"
+    SALARIED = "Salaried"
+    SELF_EMPLOYED = "Self Employed"
+    UNEMPLOYED = "Unemployed"
+    RETIRED = "Retired"
 
-    # Raw data storage for LLM or reprocessing
-    raw_data = Column(JSON, nullable=True)
+# Input Model (for Eligibility Check)
+class UserProfile(BaseModel):
+    age: int
+    income: int
+    caste: Caste
+    occupation: Occupation
+    state: str
+
+# UI-Aligned Output Model
+class SchemeResponse(BaseModel):
+    id: str  # Firestore ID
+    name: str = Field(alias="schemeName")
+    ministry: str = "Government of India"  # Default/Placeholder
+    description: str = "Government Scheme" # Placeholder
+    eligibility: str  # Synthesized text
+    benefits: str
+    is_central: bool
+    state_name: str = Field(alias="state")
+    apply_link: str = Field(alias="applyLink") 
+
+    class Config:
+        allow_population_by_field_name = True
+
+class PaginatedSchemes(BaseModel):
+    total: int
+    page: int = 1
+    size: int = 10
+    items: List[SchemeResponse]

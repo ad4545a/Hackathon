@@ -1,0 +1,13 @@
+schemeName,eligibleCaste,occupation,state,minAge,maxAge,incomeLimit,benefits,requiredDocuments,applyLink
+"Pradhan Mantri Awas Yojana","All","All","All India",18,55,300000,"Subsidy on home loan interest up to 2.67 Lakh","Aadhar Card, Income Certificate","https://pmaymis.gov.in/"
+"Ayushman Bharat Yojana","SC,ST,OBC,General","All","All India",0,100,500000,"Free health coverage up to 5 Lakh per family per year","Ration Card, Aadhar Card","https://pmjay.gov.in/"
+"Ladli Behna Yojana","All","Unemployed,Daily Wage Worker","Madhya Pradesh",23,60,250000,"Monthly financial assistance of ₹1000","Aadhar Card, Samagra ID","https://cmladlibahna.mp.gov.in/"
+"PM Kisan Samman Nidhi","All","Farmer","All India",18,100,0,"Financial support of ₹6000 per year in 3 installments","Land Records, Aadhar Card, Bank Passbook","https://pmkisan.gov.in/"
+"Post Matric Scholarship for SC","SC","Student","All India",16,35,250000,"Full tuition fee waiver and maintenance allowance","Caste Certificate, Income Certificate","https://scholarships.gov.in/"
+"Pre-Matric Scholarship for OBC","OBC","Student","All India",10,35,250000,"Financial assistance for education","Caste Certificate, Income Certificate","https://socialjustice.gov.in/"
+"MGNREGA","All","Daily Wage Worker,Unemployed","All India",18,60,0,"Guaranteed 100 days of wage employment","Job Card, Aadhar Card","https://nrega.nic.in/"
+"Atal Pension Yojana","All","Salaried,Self Employed,Daily Wage Worker","All India",18,40,0,"Guaranteed pension after age 60","Aadhar Card, Bank Account","https://www.npscra.nsdl.co.in/"
+"PM Mudra Yojana","All","Self Employed","All India",18,65,0,"Loans up to 10 Lakh for small businesses","Business Plan, KYC Docs","https://www.mudra.org.in/"
+"PM Kaushal Vikas Yojana","All","Unemployed,Student","All India",15,45,0,"Free industry-relevant skill training","Aadhar Card, Education Docs","https://www.pmkvyofficial.org/"
+"Indira Gandhi National Old Age Pension","All","Retired,Unemployed","All India",60,100,0,"Monthly pension for BPL senior citizens","BPL Card, Age Proof","https://nsap.nic.in/"
+"Gruha Lakshmi Scheme","All","Unemployed,Daily Wage Worker","Karnataka",18,100,200000,"Monthly financial assistance of ₹2000 for women head of family","Ration Card, Aadhar Card","https://sevasindhu.karnataka.gov.in/"
