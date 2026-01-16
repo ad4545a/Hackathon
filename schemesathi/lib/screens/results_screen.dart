@@ -2,37 +2,70 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'package:schemesathi/l10n/generated/app_localizations.dart';
 import 'scheme_assistant_screen.dart';
+import '../services/api_service.dart';
 
-class ResultsScreen extends StatelessWidget {
-  const ResultsScreen({super.key});
+class ResultsScreen extends StatefulWidget {
+  final Map<String, dynamic> userProfile;
+  
+  const ResultsScreen({super.key, required this.userProfile});
+
+  @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  List<Map<String, dynamic>> schemes = [];
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEligibleSchemes();
+  }
+
+  Future<void> _fetchEligibleSchemes() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      final response = await ApiService.fetchEligibleSchemes(
+        age: widget.userProfile['age'],
+        income: widget.userProfile['income'],
+        caste: widget.userProfile['caste'],
+        occupation: widget.userProfile['occupation'],
+        state: widget.userProfile['state'],
+      );
+
+      // Transform API response to match UI expectations
+      final transformedSchemes = response.map((scheme) {
+        return {
+          "name": scheme['name'] ?? scheme['schemeName'] ?? 'Unknown Scheme',
+          "eligible": true, // All returned schemes are eligible
+          "benefit": scheme['benefits'] ?? 'Benefits available',
+          "reason": scheme['eligibility'] ?? 'You meet the criteria',
+          "next_step": "Visit ${scheme['apply_link'] ?? 'official portal'} to apply",
+          "ministry": scheme['ministry'] ?? 'Government of India',
+          "description": scheme['description'] ?? '',
+        };
+      }).toList();
+
+      setState(() {
+        schemes = transformedSchemes;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Mock Data
-    final List<Map<String, dynamic>> schemes = [
-      {
-        "name": "PM Kisan Samman Nidhi",
-        "eligible": true,
-        "benefit": "₹6,000 / year",
-        "reason": "Farmer with < 2 hectares of land",
-        "next_step": "Aadhaar eKYC via PMKISAN Portal"
-      },
-      {
-        "name": "Ayushman Bharat (PM-JAY)",
-        "eligible": true,
-        "benefit": "₹5 Lakh Health Cover",
-        "reason": "Family income matches criteria",
-        "next_step": "Show Ration Card at empaneled hospital"
-      },
-      {
-        "name": "PM Vishwakarma Yojana",
-        "eligible": false,
-        "benefit": "Loan up to ₹3 Lakh",
-        "reason": "Does not match 'Artisan' occupation profile",
-        "next_step": "Update occupation details if incorrect"
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.benefits),
@@ -41,74 +74,138 @@ class ResultsScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                 BoxShadow(
-                   color: Colors.black.withValues(alpha: 0.05),
-                   blurRadius: 10,
-                   offset: const Offset(0, 4),
-                 ),
-              ],
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage != null
+              ? _buildErrorView()
+              : _buildSchemesList(),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to fetch schemes',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.secondaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.auto_awesome, color: AppTheme.secondaryColor, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.resultsTitle,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "${AppLocalizations.of(context)!.resultsSubtitle} • ${schemes.where((s) => s['eligible'] == true).length} ${AppLocalizations.of(context)!.schemes}",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.textSecondary.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppTheme.textSecondary),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20.0),
-              itemCount: schemes.length,
-              itemBuilder: (context, index) {
-                final scheme = schemes[index];
-                return _buildFloatingSchemeCard(scheme, context);
-              },
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _fetchEligibleSchemes,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildSchemesList() {
+    if (schemes.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.inbox_outlined, size: 64, color: AppTheme.textSecondary),
+              const SizedBox(height: 16),
+              const Text(
+                'No eligible schemes found',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Try adjusting your profile details',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+               BoxShadow(
+                 color: Colors.black.withValues(alpha: 0.05),
+                 blurRadius: 10,
+                 offset: const Offset(0, 4),
+               ),
+            ],
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.secondaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.auto_awesome, color: AppTheme.secondaryColor, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.resultsTitle,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${AppLocalizations.of(context)!.resultsSubtitle} • ${schemes.length} ${AppLocalizations.of(context)!.schemes}",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(20.0),
+            itemCount: schemes.length,
+            itemBuilder: (context, index) {
+              final scheme = schemes[index];
+              return _buildFloatingSchemeCard(scheme, context);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -202,7 +299,7 @@ class ResultsScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment. start,
                   children: [
                     Text(
                       scheme['name'],

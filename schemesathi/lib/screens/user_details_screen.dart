@@ -42,9 +42,20 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      // Prepare user profile data
+      final userProfile = {
+        'age': int.parse(_ageController.text),
+        'income': int.parse(_incomeController.text),
+        'caste': _selectedCaste!,
+        'occupation': _selectedOccupation!,
+        'state': _selectedState!,
+      };
+      
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const LoadingScreen()),
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(userProfile: userProfile),
+        ),
       );
     }
   }

@@ -5,7 +5,9 @@ import 'results_screen.dart';
 import 'package:schemesathi/l10n/generated/app_localizations.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+  final Map<String, dynamic> userProfile;
+  
+  const LoadingScreen({super.key, required this.userProfile});
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -38,9 +40,12 @@ class _LoadingScreenState extends State<LoadingScreen> with TickerProviderStateM
 
     // Simulate AI analysis delay
     Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ResultsScreen()),
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(userProfile: widget.userProfile),
+        ),
       );
     });
   }
