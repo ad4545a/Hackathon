@@ -7,8 +7,11 @@ import 'theme/app_theme.dart';
 import 'providers/locale_provider.dart';
 import 'screens/splash_screen.dart';
 
+import 'services/api_config.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ApiConfig.initialize();
   runApp(const MyApp());
 }
 

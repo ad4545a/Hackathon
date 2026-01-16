@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import List, Optional
 from firebase_config import get_firestore_db
-from models import SchemeResponse, UserProfile, PaginatedSchemes
+from models import SchemeResponse, UserProfile, PaginatedSchemes, ChatRequest
 import firebase_admin
+from services.llm_service import generate_answer_from_llm, get_scheme_context
+import traceback
 
 app = FastAPI(title="SchemeSathi Backend", version="1.0.0")
 
@@ -103,8 +105,54 @@ def check_eligibility(user: UserProfile):
         return eligible_schemes
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Chat Error: {e}")
+        traceback.print_exc()
+        # STEP 1: Return real error for debugging
+        return {
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
+
+@app.post("/chat")
+def chat_with_bot(request: ChatRequest):
+    # STEP 2: Add Hard Logs
+    print("CHAT API HIT")
+    print("User message:", request.message)
+    print("Scheme ID:", request.scheme_id)
+    print("Language:", request.language)
+
+    try:
+        db = get_firestore_db()
+        scheme_ref = db.collection("schemes").document(request.scheme_id)
+        doc = scheme_ref.get()
+        
+        if not doc.exists:
+            # Handle missing scheme gracefully but explicitly for debug
+            return {"response": "Scheme details are not available yet. Please try again later."}
+            
+        scheme_data = map_firestore_to_schema(doc)
+        print("Scheme data:", scheme_data) # Log scheme data
+        
+        # Prepare Context
+        context = get_scheme_context(scheme_data)
+        
+        print("CALLING LLM SERVICE NOW")
+        # Determine strictness based on request (optional)
+        # For now, always use the enhanced LLM stub
+        answer = generate_answer_from_llm(context, request.message)
+        print("LLM RESPONSE:", answer)
+        
+        return {"response": answer}
+
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        traceback.print_exc()
+        # STEP 1: Return real error for debugging
+        return {
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

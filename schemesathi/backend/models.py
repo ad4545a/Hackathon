@@ -23,7 +23,13 @@ class UserProfile(BaseModel):
     income: int
     caste: Caste
     occupation: Occupation
+    occupation: Occupation
     state: str
+
+class ChatRequest(BaseModel):
+    message: str
+    scheme_id: str
+    language: str = "en"
 
 # UI-Aligned Output Model
 class SchemeResponse(BaseModel):

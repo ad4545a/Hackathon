@@ -42,6 +42,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       // Transform API response to match UI expectations
       final transformedSchemes = response.map((scheme) {
         return {
+          "id": scheme['id'], // Pass the real ID
           "name": scheme['name'] ?? scheme['schemeName'] ?? 'Unknown Scheme',
           "eligible": true, // All returned schemes are eligible
           "benefit": scheme['benefits'] ?? 'Benefits available',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'package:schemesathi/l10n/generated/app_localizations.dart';
+import '../services/api_service.dart';
 
 class SchemeAssistantScreen extends StatefulWidget {
   final Map<String, dynamic> scheme;
@@ -27,7 +28,7 @@ class _SchemeAssistantScreenState extends State<SchemeAssistantScreen> {
     });
   }
 
-  void _sendMessage(String text) {
+  void _sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
     setState(() {
@@ -37,36 +38,39 @@ class _SchemeAssistantScreenState extends State<SchemeAssistantScreen> {
     _controller.clear();
     _scrollToBottom();
 
-    // Simulate AI Response
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    // Call API
+    try {
+      print("Chat scheme ID: ${widget.scheme['id']}"); // Debug log
+      final response = await ApiService.chatWithBot(
+        message: text,
+        schemeId: widget.scheme['id'] ?? 'unknown_scheme', // Ensure ID is passed
+      );
+
       if (!mounted) return;
       setState(() {
         _isTyping = false;
         _messages.add({
           'isUser': false,
-          'text': _generateResponse(text),
+          'text': response,
         });
       });
       _scrollToBottom();
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add({
+          'isUser': false,
+          'text': "Sorry, I encountered an error: ${e.toString()}",
+        });
+      });
+      _scrollToBottom();
+    }
   }
 
+  // Helper validation (not used for logic anymore)
   String _generateResponse(String userQuery) {
-    final query = userQuery.toLowerCase();
-    final schemeName = widget.scheme['name'] ?? "this scheme";
-    
-    // Simple Keyword matching for mocked logic - in real app this would call an API
-    if (query.contains('eligible') || query.contains('eligibility')) {
-      return "To be eligible for **$schemeName**, you typically need to:\n\n• Be a resident citizen.\n• Have an annual income within limits (if applicable).\n• Meet specific criteria like occupation (e.g., ${widget.scheme['reason'] ?? 'Farmer, Artisan'}).";
-    } else if (query.contains('document') || query.contains('doc')) {
-      return "You will generally need the following documents:\n\n1. **Aadhaar Card** (Identity Proof)\n2. **Bank Account Details** (For subsidy transfer)\n3. **Income Certificate**\n4. **Passport Size Photo**\n\nPlease ensure your mobile number is linked to Aadhaar.";
-    } else if (query.contains('apply') || query.contains('how to')) {
-      return "**Step-by-Step Application:**\n\n1. Visit the official portal.\n2. Click on 'New Registration'.\n3. Fill in your details (Aadhaar, Mobile).\n4. Upload key documents.\n5. Submit and note down your Application ID.\n\nWould you like the official link?";
-    } else if (query.contains('mistake') || query.contains('reject')) {
-      return "Common mistakes to avoid:\n\n• **Name Mismatch**: Ensure name on Aadhaar matches Bank Account exactly.\n• **Expired Documents**: Use valid certificates.\n• **Wrong Bank Details**: Double-check IFSC code.";
-    } else {
-      return "I can help with **Eligibility**, **Documents**, **Application Steps**, or **Common Mistakes**. Please select one of the options or ask specifically about these topics.";
-    }
+     return ""; // Deprecated
   }
 
   void _scrollToBottom() {
@@ -103,13 +107,14 @@ class _SchemeAssistantScreenState extends State<SchemeAssistantScreen> {
       ),
       body: Column(
         children: [
-          // 🔹 Top Section (Scheme Summary Card)
+          // 🔹 Top Section (Scheme Summary Card) - Flexible & Scrollable
           Container(
+            constraints: const BoxConstraints(maxHeight: 200), // Limit height
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             color: Colors.white,
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -118,28 +123,48 @@ class _SchemeAssistantScreenState extends State<SchemeAssistantScreen> {
                   BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.scheme['name'],
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildStatusChip(isEligible, statusColor, l10n),
-                      Text(
-                        widget.scheme['benefit'],
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                      ),
-                    ],
-                  )
-                ],
+              child: SingleChildScrollView( // Make content scrollable
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.scheme['name'] ?? 'Scheme Name',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(child: _buildStatusChip(isEligible, statusColor, l10n)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.scheme['benefit'] ?? 'Benefits',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                            textAlign: TextAlign.end,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.scheme['description'] ?? 'No description available.',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          
+          const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
 
           // 🔹 Chat Area
           Expanded(
