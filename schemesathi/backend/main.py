@@ -28,6 +28,9 @@ def map_firestore_to_schema(doc) -> dict:
     # ministry default
     data['ministry'] = "Government Dept"
     
+    # Ensure all fields for LLM are present
+    data['requiredDocuments'] = data.get('requiredDocuments', 'Not specified')
+
     return data
 
 @app.get("/schemes", response_model=PaginatedSchemes)
@@ -139,7 +142,7 @@ def chat_with_bot(request: ChatRequest):
         print("CALLING LLM SERVICE NOW")
         # Determine strictness based on request (optional)
         # For now, always use the enhanced LLM stub
-        answer = generate_answer_from_llm(context, request.message)
+        answer = generate_answer_from_llm(context, request.message, request.history)
         print("LLM RESPONSE:", answer)
         
         return {"response": answer}

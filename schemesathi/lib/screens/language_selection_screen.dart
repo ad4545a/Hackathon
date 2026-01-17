@@ -5,9 +5,12 @@ import '../theme/app_theme.dart';
 import '../providers/locale_provider.dart';
 import 'user_details_screen.dart';
 import 'onboarding_screen.dart';
+import '../services/preferences_service.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
-  const LanguageSelectionScreen({super.key});
+  final bool fromSettings;
+
+  const LanguageSelectionScreen({super.key, this.fromSettings = false});
 
   @override
   State<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
@@ -210,10 +213,23 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     child: ElevatedButton(
                       onPressed: localeProvider.locale == null
                           ? null
-                          : () {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (_) => OnboardingScreen()),
-                              );
+                          : () async {
+                              // Always save preference, though strictly only needed for first time
+                              if (!widget.fromSettings) {
+                                await PreferencesService.setLanguageSelected(true);
+                              }
+                              
+                              if (!context.mounted) return;
+
+                              if (widget.fromSettings) {
+                                // Settings Mode: Just go back
+                                Navigator.pop(context);
+                              } else {
+                                // Initial Mode: Go to Onboarding
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(builder: (_) => OnboardingScreen()),
+                                );
+                              }
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
@@ -226,7 +242,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         ),
                       ),
                       child: Text(
-                        l10n.continueBtn,
+                        widget.fromSettings ? "Save" : l10n.continueBtn,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

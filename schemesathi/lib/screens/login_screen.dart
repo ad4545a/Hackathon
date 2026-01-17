@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/preferences_service.dart';
 import '../theme/app_theme.dart';
 import 'package:schemesathi/l10n/generated/app_localizations.dart';
 import 'package:schemesathi/screens/splash_screen.dart' as import_splash;
@@ -25,23 +25,23 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
     
     // Save Login State
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', true);
+    await PreferencesService.setLoggedIn(true);
 
     // Navigate to UserDetailsScreen
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const UserDetailsScreen()),
+      (route) => false, // Clear back stack
     );
   }
 
   void _handleGuest() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', true);
+    await PreferencesService.setLoggedIn(true);
     
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const UserDetailsScreen()),
+      (route) => false,
     );
   }
 
@@ -234,11 +234,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             // Dev: Reset App Button
                             TextButton.icon(
                               onPressed: () async {
-                                final prefs = await SharedPreferences.getInstance();
-                                await prefs.clear();
+                                await PreferencesService.clearAll();
                                 if (context.mounted) {
-                                  Navigator.pushReplacementNamed(context, '/'); // or restart
-                                  // Since we don't have named routes setup for root properly in main, push Splash
                                   Navigator.pushReplacement(
                                     context, 
                                     MaterialPageRoute(builder: (_) => const import_splash.SplashScreen()),

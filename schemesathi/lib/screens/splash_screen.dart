@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import '../services/preferences_service.dart';
 import '../theme/app_theme.dart';
 import 'user_details_screen.dart';
 import 'language_selection_screen.dart';
@@ -59,24 +60,28 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _fadeController.forward();
 
     // Navigation Timer
-    // Navigation Timer
     Timer(const Duration(seconds: 3), () async {
-      final prefs = await SharedPreferences.getInstance();
-      final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-      final bool languageSelected = prefs.getBool('language_selected') ?? false;
-      final bool onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+      // Use the new service for cleaner logic
+      final bool isLoggedIn = await PreferencesService.isLoggedIn();
+      final bool languageSelected = await PreferencesService.isLanguageSelected();
+      final bool onboardingComplete = await PreferencesService.isOnboardingCompleted();
 
       if (!mounted) return;
 
       Widget nextScreen;
       
+      // Strict Priority Logic as per requirements
       if (isLoggedIn) {
+        // 1. Logged in -> Main Screen (UserDetailsScreen for now)
         nextScreen = const UserDetailsScreen();
       } else if (!languageSelected) {
+        // 2. Not logged in & No Lang -> Language Selection
         nextScreen = const LanguageSelectionScreen();
       } else if (!onboardingComplete) {
+        // 3. Lang selected but No Onboarding -> Onboarding
         nextScreen = OnboardingScreen(); 
       } else {
+        // 4. Lang & Onboarding done -> Login
         nextScreen = const LoginScreen();
       }
 

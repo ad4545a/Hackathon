@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/preferences_service.dart';
 import 'package:schemesathi/l10n/generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'loading_screen.dart';
@@ -145,7 +145,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                                                 Navigator.pop(context);
                                                 Navigator.push(
                                                   context,
-                                                  MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()),
+                                                  MaterialPageRoute(builder: (context) => const LanguageSelectionScreen(fromSettings: true)),
                                                 );
                                               },
                                             ),
@@ -155,8 +155,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                                               title: const Text("Logout", style: TextStyle(color: Colors.red)),
                                               onTap: () async {
                                                 Navigator.pop(context);
-                                                final prefs = await SharedPreferences.getInstance();
-                                                await prefs.clear(); // Clear all data to restart flow
+                                                await PreferencesService.logout();
                                                 if (!context.mounted) return;
                                                 Navigator.of(context).pushAndRemoveUntil(
                                                   MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()),

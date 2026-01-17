@@ -38,12 +38,21 @@ class _SchemeAssistantScreenState extends State<SchemeAssistantScreen> {
     _controller.clear();
     _scrollToBottom();
 
+    // Build history
+    List<Map<String, String>> history = _messages.map((m) {
+      return {
+        'role': m['isUser'] == true ? 'user' : 'model',
+        'content': (m['text'] ?? '').toString(),
+      };
+    }).toList();
+
     // Call API
     try {
       print("Chat scheme ID: ${widget.scheme['id']}"); // Debug log
       final response = await ApiService.chatWithBot(
         message: text,
         schemeId: widget.scheme['id'] ?? 'unknown_scheme', // Ensure ID is passed
+        history: history,
       );
 
       if (!mounted) return;

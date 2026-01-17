@@ -1,0 +1,17 @@
+[Unit]
+Description=SchemeSathi Backend
+After=network.target
+
+[Service]
+# Usage: Assumes running as root for this temp deployment or user with rights. 
+# Adjust User= if a specific user is desired.
+User=root
+WorkingDirectory=/opt/schemesathi/backend
+# Running on port 8001 to avoid conflicts
+ExecStart=/opt/schemesathi/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001
+Restart=always
+# Environment variables loaded from .env
+EnvironmentFile=/opt/schemesathi/backend/.env 
+
+[Install]
+WantedBy=multi-user.target

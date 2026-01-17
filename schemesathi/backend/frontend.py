@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Constants
-API_URL = "http://127.0.0.1:8000/schemes/eligible"
+API_URL = "http://117.252.16.130:8001/schemes/eligible"
 
 # Enums (matching models.py)
 CASTES = ["General", "SC", "ST", "OBC"]

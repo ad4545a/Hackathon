@@ -30,6 +30,7 @@ class ChatRequest(BaseModel):
     message: str
     scheme_id: str
     language: str = "en"
+    history: List[dict] = [] # Format: [{"role": "user", "content": "msg"}, {"role": "model", "content": "msg"}]
 
 # UI-Aligned Output Model
 class SchemeResponse(BaseModel):

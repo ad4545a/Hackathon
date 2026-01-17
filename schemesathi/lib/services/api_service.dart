@@ -78,6 +78,7 @@ class ApiService {
     required String message,
     required String schemeId,
     String language = 'en',
+    List<Map<String, String>> history = const [],
   }) async {
     Uri? uri;
     try {
@@ -90,6 +91,7 @@ class ApiService {
           'message': message,
           'scheme_id': schemeId,
           'language': language,
+          'history': history,
         }),
       ).timeout(const Duration(seconds: 20));
 
