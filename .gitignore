@@ -8,3 +8,8 @@ yarn-debug.log*
 yarn-error.log*
 .idea/
 .vscode/
+
+# Hackathon planning docs
+brain.md
+Member2_Roadmap_Drivers_Trips*.md
+TransitOps Smart Transport Operations Platform*.md
