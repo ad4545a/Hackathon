@@ -2,32 +2,58 @@ const mongoose = require('mongoose');
 
 const vehicleSchema = new mongoose.Schema(
   {
-    plateNumber: {
+    registrationNumber: {
       type: String,
-      required: true,
+      required: [true, 'Registration number is required'],
       unique: true,
+      uppercase: true,
+      trim: true,
+      index: true,
     },
-    status: {
+    name: {
       type: String,
-      enum: ['AVAILABLE', 'IN_SHOP', 'ON_TRIP', 'RETIRED'],
-      default: 'AVAILABLE',
-      required: true,
+      required: [true, 'Vehicle name is required'],
+      trim: true,
     },
-    vehicleType: {
+    model: {
       type: String,
-      required: true,
-      default: 'Truck',
+      required: [true, 'Vehicle model is required'],
+      trim: true,
     },
-    region: {
+    type: {
       type: String,
-      required: true,
-      default: 'North',
+      required: [true, 'Vehicle type is required'],
+      trim: true,
+    },
+    maximumLoadCapacity: {
+      type: Number,
+      required: [true, 'Maximum load capacity is required'],
+      min: [0, 'Maximum load capacity must be a positive number'],
+    },
+    odometer: {
+      type: Number,
+      required: [true, 'Odometer reading is required'],
+      min: [0, 'Odometer reading cannot be negative'],
+      default: 0,
     },
     acquisitionCost: {
       type: Number,
-      required: true,
-      min: 0,
-      default: 50000,
+      required: [true, 'Acquisition cost is required'],
+      min: [0, 'Acquisition cost must be a positive number'],
+    },
+    region: {
+      type: String,
+      required: [true, 'Region is required'],
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ['AVAILABLE', 'ON_TRIP', 'IN_SHOP', 'RETIRED'],
+        message: '{VALUE} is not a valid vehicle status',
+      },
+      default: 'AVAILABLE',
+      index: true,
     },
   },
   {
