@@ -3,7 +3,11 @@ import { AuthLayout } from '@/layouts/AuthLayout'
 import { AppShell } from '@/layouts/AppShell'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { VehiclesPage } from '@/pages/VehiclesPage'
+import { DriversPage } from '@/pages/DriversPage'
+import { DispatchPage } from '@/pages/DispatchPage'
+import { MaintenancePage } from '@/pages/MaintenancePage'
+import { ExpensesPage } from '@/pages/ExpensesPage'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 
 export function AppRoutes() {
@@ -17,11 +21,11 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/vehicles" element={<PlaceholderPage title="Vehicles" />} />
-          <Route path="/drivers" element={<PlaceholderPage title="Drivers" />} />
-          <Route path="/dispatch" element={<PlaceholderPage title="Dispatch" />} />
-          <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
-          <Route path="/expenses" element={<PlaceholderPage title="Expenses" />} />
+          <Route path="/vehicles" element={<VehiclesPage />} />
+          <Route path="/drivers" element={<DriversPage />} />
+          <Route path="/dispatch" element={<DispatchPage />} />
+          <Route path="/maintenance" element={<MaintenancePage />} />
+          <Route path="/expenses" element={<ExpensesPage />} />
         </Route>
       </Route>
 
