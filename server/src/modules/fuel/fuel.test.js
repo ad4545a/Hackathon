@@ -77,7 +77,14 @@ beforeEach(async () => {
 
   // Create a test vehicle
   testVehicle = await Vehicle.create({
-    plateNumber: 'MH-12-AB-1234',
+    registrationNumber: 'MH-12-AB-1234',
+    name: 'Test Vehicle',
+    model: 'Test Model',
+    type: 'Van',
+    maximumLoadCapacity: 1000,
+    odometer: 100,
+    acquisitionCost: 15000,
+    region: 'North',
     status: 'AVAILABLE',
   });
 });
