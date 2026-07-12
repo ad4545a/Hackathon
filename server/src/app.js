@@ -1,0 +1,38 @@
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const errorHandler = require('./middleware/error.middleware');
+const authRoutes = require('./modules/auth/auth.routes');
+const { NotFoundError } = require('./shared/errors/customErrors');
+
+const app = express();
+
+// Middlewares
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Base Route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Welcome to TransitOps API v1',
+  });
+});
+
+// Mount Routes
+app.use('/api/v1/auth', authRoutes);
+
+// Catch-all route for unhandled endpoints
+app.all('*', (req, res, next) => {
+  next(new NotFoundError(`Can't find ${req.originalUrl} on this server!`));
+});
+
+// Centralized error handler
+app.use(errorHandler);
+
+module.exports = app;
