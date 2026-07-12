@@ -8,6 +8,8 @@ const maintenanceRoutes = require('./modules/maintenance/maintenance.routes');
 const fuelRoutes = require('./modules/fuel/fuel.routes');
 const driverRoutes = require('./routes/drivers');
 const tripRoutes = require('./routes/trips');
+const expenseRoutes = require('./routes/expenses');
+const dashboardRoutes = require('./routes/dashboard');
 const { NotFoundError } = require('./shared/errors/customErrors');
 
 const app = express();
@@ -38,6 +40,8 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/v1/drivers', driverRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/v1/trips', tripRoutes);
+app.use('/api/v1/expenses', expenseRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 
 // Catch-all route for unhandled endpoints
 app.all('*', (req, res, next) => {

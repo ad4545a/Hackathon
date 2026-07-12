@@ -3,6 +3,54 @@ const mongoose = require('mongoose');
 const User = require('../modules/users/user.model');
 const Driver = require('../models/Driver');
 const Vehicle = require('../modules/vehicles/vehicle.model');
+const Expense = require('../models/Expense');
+const FuelLog = require('../modules/fuel/fuel.model');
+
+const seedExpenses = (vehicles, users) => [
+  {
+    vehicleId: vehicles[0]._id, // Van-05
+    type: 'TOLL',
+    amount: 45,
+    description: 'Highway toll charge for Route 5',
+    date: new Date('2026-07-10'),
+    createdBy: users[0]._id, // John Manager
+  },
+  {
+    vehicleId: vehicles[1]._id, // Truck-12
+    type: 'REPAIR',
+    amount: 320,
+    description: 'Brake pad replacement',
+    date: new Date('2026-07-09'),
+    createdBy: users[0]._id,
+  },
+  {
+    vehicleId: vehicles[2]._id, // Sedan-01
+    type: 'OTHER',
+    amount: 15,
+    description: 'Car wash and cleaning',
+    date: new Date('2026-07-11'),
+    createdBy: users[0]._id,
+  },
+];
+
+const seedFuelLogs = (vehicles, users) => [
+  {
+    vehicleId: vehicles[0]._id,
+    liters: 40,
+    cost: 120,
+    odometer: 12100,
+    date: new Date('2026-07-10'),
+    createdBy: users[0]._id,
+  },
+  {
+    vehicleId: vehicles[1]._id,
+    liters: 120,
+    cost: 360,
+    odometer: 45200,
+    date: new Date('2026-07-09'),
+    createdBy: users[0]._id,
+  },
+];
 
 const seedVehicles = [
   {
@@ -140,8 +188,10 @@ const seedDB = async () => {
     console.log('Cleared existing users.');
 
     // Create users (pre-save hook will hash passwords)
+    const createdUsers = [];
     for (const user of seedUsers) {
-      await User.create(user);
+      const u = await User.create(user);
+      createdUsers.push(u);
     }
     console.log(`Successfully seeded ${seedUsers.length} users.`);
 
@@ -160,10 +210,26 @@ const seedDB = async () => {
     console.log('Cleared existing vehicles.');
 
     // Create vehicles
+    const createdVehicles = [];
     for (const vehicle of seedVehicles) {
-      await Vehicle.create(vehicle);
+      const v = await Vehicle.create(vehicle);
+      createdVehicles.push(v);
     }
     console.log(`Successfully seeded ${seedVehicles.length} vehicles.`);
+
+    // Clear and seed fuel logs
+    await FuelLog.deleteMany({});
+    for (const fl of seedFuelLogs(createdVehicles, createdUsers)) {
+      await FuelLog.create(fl);
+    }
+    console.log('Successfully seeded fuel logs.');
+
+    // Clear and seed expenses
+    await Expense.deleteMany({});
+    for (const exp of seedExpenses(createdVehicles, createdUsers)) {
+      await Expense.create(exp);
+    }
+    console.log('Successfully seeded expenses.');
 
     process.exit(0);
   } catch (error) {
