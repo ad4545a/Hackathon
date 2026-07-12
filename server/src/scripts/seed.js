@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../modules/users/user.model');
+const Driver = require('../models/Driver');
 
 const seedUsers = [
   {
@@ -29,6 +30,69 @@ const seedUsers = [
   },
 ];
 
+const seedDrivers = [
+  {
+    name: 'Alex Expired',
+    license_number: 'DL-EXP12345',
+    license_category: 'Heavy Truck',
+    license_expiry_date: new Date('2026-06-01'), // Expired (relative to current date 2026-07-12)
+    contact_number: '+15550101',
+    safety_score: 85,
+    status: 'Available',
+    region: 'North',
+  },
+  {
+    name: 'Bob Suspended',
+    license_number: 'DL-SUS67890',
+    license_category: 'Light Commercial',
+    license_expiry_date: new Date('2027-10-15'),
+    contact_number: '+15550102',
+    safety_score: 45,
+    status: 'Suspended',
+    region: 'East',
+  },
+  {
+    name: 'Charlie Active',
+    license_number: 'DL-ONT11223',
+    license_category: 'Heavy Truck',
+    license_expiry_date: new Date('2028-04-20'),
+    contact_number: '+15550103',
+    safety_score: 95,
+    status: 'On Trip',
+    region: 'West',
+  },
+  {
+    name: 'David Available',
+    license_number: 'DL-AVL44556',
+    license_category: 'Heavy Truck',
+    license_expiry_date: new Date('2027-12-01'),
+    contact_number: '+15550104',
+    safety_score: 98,
+    status: 'Available',
+    region: 'South',
+  },
+  {
+    name: 'Eva Available',
+    license_number: 'DL-AVL77889',
+    license_category: 'Light Commercial',
+    license_expiry_date: new Date('2027-08-30'),
+    contact_number: '+15550105',
+    safety_score: 92,
+    status: 'Available',
+    region: 'North',
+  },
+  {
+    name: 'Frank Available',
+    license_number: 'DL-AVL99001',
+    license_category: 'Heavy Truck',
+    license_expiry_date: new Date('2026-11-15'),
+    contact_number: '+15550106',
+    safety_score: 89,
+    status: 'Available',
+    region: 'West',
+  },
+];
+
 const seedDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
@@ -43,6 +107,16 @@ const seedDB = async () => {
       await User.create(user);
     }
     console.log(`Successfully seeded ${seedUsers.length} users.`);
+
+    // Delete existing drivers
+    await Driver.deleteMany({});
+    console.log('Cleared existing drivers.');
+
+    // Create drivers (pre-save hook handles status history)
+    for (const driver of seedDrivers) {
+      await Driver.create(driver);
+    }
+    console.log(`Successfully seeded ${seedDrivers.length} drivers.`);
 
     process.exit(0);
   } catch (error) {
