@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const errorHandler = require('./middleware/error.middleware');
 const authRoutes = require('./modules/auth/auth.routes');
+const vehicleRoutes = require('./modules/vehicles/vehicle.routes');
 const maintenanceRoutes = require('./modules/maintenance/maintenance.routes');
 const driverRoutes = require('./routes/drivers');
 const { NotFoundError } = require('./shared/errors/customErrors');
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 
 // Mount Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/vehicles', vehicleRoutes);
 app.use('/api/v1/maintenance', maintenanceRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/v1/drivers', driverRoutes);

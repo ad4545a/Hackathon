@@ -2,6 +2,43 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../modules/users/user.model');
 const Driver = require('../models/Driver');
+const Vehicle = require('../modules/vehicles/vehicle.model');
+
+const seedVehicles = [
+  {
+    registrationNumber: 'MH-12-AB-0005',
+    name: 'Van-05',
+    model: 'Tata Super Ace',
+    type: 'Van',
+    maximumLoadCapacity: 500,
+    odometer: 12000,
+    acquisitionCost: 8000,
+    region: 'North',
+    status: 'AVAILABLE',
+  },
+  {
+    registrationNumber: 'MH-12-XY-1212',
+    name: 'Truck-12',
+    model: 'Eicher Pro',
+    type: 'Truck',
+    maximumLoadCapacity: 5000,
+    odometer: 45000,
+    acquisitionCost: 28000,
+    region: 'West',
+    status: 'AVAILABLE',
+  },
+  {
+    registrationNumber: 'MH-12-PQ-9999',
+    name: 'Sedan-01',
+    model: 'Maruti Dzire',
+    type: 'Sedan',
+    maximumLoadCapacity: 350,
+    odometer: 80000,
+    acquisitionCost: 10000,
+    region: 'South',
+    status: 'AVAILABLE',
+  },
+];
 
 const seedUsers = [
   {
@@ -117,6 +154,16 @@ const seedDB = async () => {
       await Driver.create(driver);
     }
     console.log(`Successfully seeded ${seedDrivers.length} drivers.`);
+
+    // Delete existing vehicles
+    await Vehicle.deleteMany({});
+    console.log('Cleared existing vehicles.');
+
+    // Create vehicles
+    for (const vehicle of seedVehicles) {
+      await Vehicle.create(vehicle);
+    }
+    console.log(`Successfully seeded ${seedVehicles.length} vehicles.`);
 
     process.exit(0);
   } catch (error) {
