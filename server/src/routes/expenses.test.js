@@ -1,4 +1,4 @@
-require('dotenv').config();
+jest.setTimeout(30000);
 const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../app');
@@ -26,9 +26,10 @@ const testSafetyOfficer = {
 
 beforeAll(async () => {
   const dbURI = process.env.MONGODB_URI 
-    ? process.env.MONGODB_URI.replace('/transitops', '/transitops_test') 
-    : 'mongodb://localhost:27017/transitops_test?replicaSet=rs0';
-  await mongoose.connect(dbURI);
+  ? process.env.MONGODB_URI.replace('/transitops', '/transitops_test') 
+  : 'mongodb://localhost:27017/transitops_test?replicaSet=rs0';
+const cleanURI = dbURI.replace('?replicaSet=rs0', '').replace('&replicaSet=rs0', '');
+await mongoose.connect(cleanURI);
 
   await User.deleteMany({});
   await Vehicle.deleteMany({});

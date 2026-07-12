@@ -45,6 +45,6 @@ const expenseSchema = new mongoose.Schema(
 expenseSchema.index({ vehicleId: 1 });
 expenseSchema.index({ date: 1 });
 
-const Expense = mongoose.model('Expense', expenseSchema);
+const Expense = mongoose.models.Expense || mongoose.model('Expense', expenseSchema);
 
 module.exports = Expense;

@@ -11,6 +11,8 @@ class ExpenseRepository {
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate('vehicleId', 'registrationNumber name model')
+      .populate('createdBy', 'name role')
       .exec();
   }
 

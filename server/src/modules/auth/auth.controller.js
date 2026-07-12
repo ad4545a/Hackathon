@@ -3,7 +3,8 @@ const User = require('../users/user.model');
 const { UnauthorizedError } = require('../../shared/errors/customErrors');
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  const secret = process.env.JWT_SECRET || 'test-secret';
+  return jwt.sign({ id }, secret, {
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
   });
 };
