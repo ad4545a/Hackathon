@@ -12,12 +12,9 @@ const testUser = {
 };
 
 beforeAll(async () => {
-  let dbURI = process.env.MONGODB_URI 
+  const dbURI = process.env.MONGODB_URI 
     ? process.env.MONGODB_URI.replace('/transitops', '/transitops_test') 
     : 'mongodb://localhost:27017/transitops_test?replicaSet=rs0';
-  
-  // Strip replicaSet option if not running in a replica-set environment
-  dbURI = dbURI.replace('?replicaSet=rs0', '').replace('&replicaSet=rs0', '');
   await mongoose.connect(dbURI);
 });
 
